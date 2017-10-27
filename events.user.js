@@ -57,14 +57,8 @@ EventMerger.prototype = {
     },
     mergeEvents: function (name, event_set) {
         if (event_set.length > 1) {
-
-            var background = $(event_set[0]).css('background-color');
-            // If the background is transparent, use the text color
-            var style_type = background.indexOf("rgba") == -1 ?
-                        'background-color' : 'color';
-
             var colors = $.map(event_set, function (event) {
-                return $(event).css(style_type);
+                return getBackgroundColor($(event));
             });
 
             var keep = event_set.shift();
@@ -73,10 +67,10 @@ EventMerger.prototype = {
                 $(this).parent().find('*').css('visibility', 'hidden');
             });
 
-            if (style_type == 'background-color') {
-                this.makeStripes(keep, colors);
-            } else {
+            if (isTransparent(keep)) {
                 this.makeAltTextColors(keep, colors);
+            } else {
+                this.makeStripes(keep, colors);
             }
             this.cleanUp && this.cleanUp(keep);
         }
@@ -88,6 +82,26 @@ EventMerger.prototype = {
 };
 
 /*****************************************************************************/
+
+function isTransparent($event) {
+  return $event.css('background-color').indexOf('rgba') !== -1;
+}
+
+/**
+ * Return background color of the calendar event,
+ * or the text color if the event is transparent,
+ * as is the case for events with times in the monthly view
+ * in the calendar's pre-material design.
+ */
+function getBackgroundColor($event) {
+  var background = $event.css('background-color');
+
+  if (isTransparent($event)) {
+    return $event.css('color');
+  } else {
+    return background;
+  }
+}
 
 function cleanEventTitle(event_title) {
     return event_title.trim()
