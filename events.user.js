@@ -18,6 +18,25 @@ function LegacyEventMerger(key_function, clean_up_function) {
 }
 
 LegacyEventMerger.prototype = {
+    /**
+     * Return background color of the calendar event,
+     * or the text color if the event is transparent,
+     * as is the case for events with times in the monthly view
+     * in the calendar's pre-material design.
+     */
+    getBackgroundColor: function ($event) {
+        var background = $event.css('background-color');
+
+        if (isTransparent($event)) {
+            return $event.css('color');
+        } else {
+            return background;
+        }
+    },
+    hideEvent: function ($event) {
+        $event.parent().css('visibility', 'hidden');
+        $event.parent().find('*').css('visibility', 'hidden');
+    },
     makeAltTextColors: function ($element, colors) {
         $element.prepend(" ");
         $element.find(".color-bar").remove();
@@ -34,11 +53,13 @@ LegacyEventMerger.prototype = {
     },
     mergeEvents: function (name, event_set) {
         if (event_set.length > 1) {
+            var getBackgroundColor = this.getBackgroundColor;
             var colors = $.map(event_set, function (event) {
                 return getBackgroundColor($(event));
             });
 
             var keep = event_set.shift();
+            var hideEvent = this.hideEvent;
             $(event_set).each(function (i, $event) {
                 hideEvent($event);
             });
@@ -85,27 +106,6 @@ function makeStripes($element, colors) {
 
 function isTransparent($event) {
   return $event.css('background-color').indexOf('rgba') !== -1;
-}
-
-/**
- * Return background color of the calendar event,
- * or the text color if the event is transparent,
- * as is the case for events with times in the monthly view
- * in the calendar's pre-material design.
- */
-function getBackgroundColor($event) {
-  var background = $event.css('background-color');
-
-  if (isTransparent($event)) {
-    return $event.css('color');
-  } else {
-    return background;
-  }
-}
-
-function hideEvent($event) {
-    $event.parent().css('visibility', 'hidden');
-    $event.parent().find('*').css('visibility', 'hidden');
 }
 
 function cleanEventTitle(event_title) {
