@@ -117,14 +117,18 @@ function cleanEventTitle(event_title) {
         .replace(/\(.*\)$/, ''); // Remove parentheticals at end for 1:1 lab
 }
 
-function weekTimedEventKey($event) {
+function getLegacyWeekTimedEventKey($event) {
     var event_name = cleanEventTitle($event.find('dd .evt-lk').text()),
         event_time = $event.find('dt').text(),
         col = $event.parents('.tg-col-eventwrapper').attr('id');
     return event_name + event_time + col;
 }
 
-function tableEventKey($event) {
+function getLegacyWeekAllDayEventKey($event) {
+    return getTableEventKey($event);
+}
+
+function getTableEventKey($event) {
     var event_name = cleanEventTitle($event.text()),
         $td = $event.parents('td'),
         days = $td.attr("colspan") || 1,
@@ -132,14 +136,14 @@ function tableEventKey($event) {
     return event_name + ":" + col + ":" + days;
 }
 
-function monthAllDayEventKey($event) {
+function getLegacyMonthAllDayEventKey($event) {
     var row = $event.parents('.month-row').index();
-    return tableEventKey($event) + ":" + row;
+    return getTableEventKey($event) + ":" + row;
 }
 
-function monthTimedEventKey($event) {
+function getLegacyMonthTimedEventKey($event) {
     var time = $event.find('.te-t').text();
-    return monthAllDayEventKey($event) + time;
+    return getLegacyMonthAllDayEventKey($event) + time;
 }
 
 function cleanUp($event) {
@@ -150,10 +154,10 @@ function cleanUp($event) {
     }
 }
 
-var weekTimed = new LegacyEventMerger(weekTimedEventKey, cleanUp),
-    weekAllDay = new LegacyEventMerger(tableEventKey),
-    monthTimed = new LegacyEventMerger(monthTimedEventKey),
-    monthAllDay = new LegacyEventMerger(monthAllDayEventKey);
+var weekTimed = new LegacyEventMerger(getLegacyWeekTimedEventKey, cleanUp),
+    weekAllDay = new LegacyEventMerger(getLegacyWeekAllDayEventKey),
+    monthTimed = new LegacyEventMerger(getLegacyMonthTimedEventKey),
+    monthAllDay = new LegacyEventMerger(getLegacyMonthAllDayEventKey);
 
 chrome.runtime.sendMessage({}, function(response) {
   if (response.enabled) {
