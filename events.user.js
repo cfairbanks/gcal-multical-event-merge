@@ -12,9 +12,9 @@
 
 'use strict';
 
-function LegacyEventMerger(key_function, clean_up_function) {
+function LegacyEventMerger(key_function, do_clean_up) {
     this.makeKey = key_function;
-    this.cleanUp = clean_up_function;
+    this.do_clean_up = do_clean_up;
 }
 
 LegacyEventMerger.prototype = {
@@ -36,6 +36,13 @@ LegacyEventMerger.prototype = {
     hideEvent: function ($event) {
         $event.parent().css('visibility', 'hidden');
         $event.parent().find('*').css('visibility', 'hidden');
+    },
+    cleanUp: function ($event) {
+        var chip = $event.parents('.chip');
+        if (chip[0]) {
+            var left = Number(chip[0].style.left.replace(/%/g, ''));
+            chip.css('width', 100 - (isNaN(left) ? 0 : left) + "%");
+        }
     },
     makeAltTextColors: function ($element, colors) {
         $element.prepend(" ");
@@ -69,7 +76,10 @@ LegacyEventMerger.prototype = {
             } else {
                 makeStripes(keep, colors);
             }
-            this.cleanUp && this.cleanUp(keep);
+
+            if (this.do_clean_up) {
+                this.cleanUp(keep);
+            }
         }
     },
     mergeSets: function ($events) {
@@ -146,15 +156,7 @@ function getLegacyMonthTimedEventKey($event) {
     return getLegacyMonthAllDayEventKey($event) + time;
 }
 
-function cleanUp($event) {
-    var chip = $event.parents('.chip');
-    if (chip[0]) {
-        var left = Number(chip[0].style.left.replace(/%/g, ''));
-        chip.css('width', 100 - (isNaN(left) ? 0 : left) + "%");
-    }
-}
-
-var weekTimed = new LegacyEventMerger(getLegacyWeekTimedEventKey, cleanUp),
+var weekTimed = new LegacyEventMerger(getLegacyWeekTimedEventKey, true),
     weekAllDay = new LegacyEventMerger(getLegacyWeekAllDayEventKey),
     monthTimed = new LegacyEventMerger(getLegacyMonthTimedEventKey),
     monthAllDay = new LegacyEventMerger(getLegacyMonthAllDayEventKey);
