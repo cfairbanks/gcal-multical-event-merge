@@ -108,6 +108,10 @@ function isTransparent($event) {
   return $event.css('background-color').indexOf('rgba') !== -1;
 }
 
+function isWhite(color) {
+    return color === 'rgb(255, 255, 255)';
+}
+
 function cleanEventTitle(event_title) {
     return event_title.trim()
         .replace(/\(.*\)$/, ''); // Remove parentheticals at end for 1:1 lab
