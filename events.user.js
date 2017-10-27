@@ -18,17 +18,6 @@ function EventMerger(key_function, clean_up_function) {
 }
 
 EventMerger.prototype = {
-    getEventSets: function ($events) {
-        var event_sets = {},
-            makeKey = this.makeKey;
-        $events.each(function () {
-            var $event = $(this),
-                key = makeKey($event).replace(/\s/g, '');
-            event_sets[key] = event_sets[key] || [];
-            event_sets[key].push($event);
-        });
-        return event_sets;
-    },
     makeAltTextColors: function ($element, colors) {
         $element.prepend(" ");
         $element.find(".color-bar").remove();
@@ -42,18 +31,6 @@ EventMerger.prototype = {
                     'display': 'inline-block'
                 }));
         });
-    },
-    makeStripes: function ($element, colors) {
-        var gradient = "repeating-linear-gradient( 45deg,",
-            pos = 0;
-        $.each(colors, function (i, color) {
-            gradient += color + " " + pos + "px,";
-            pos += 10;
-            gradient += color + " " + pos + "px,";
-        });
-        gradient = gradient.slice(0, -1);
-        gradient += ")";
-        $element.css('background-image', gradient);
     },
     mergeEvents: function (name, event_set) {
         if (event_set.length > 1) {
@@ -69,18 +46,42 @@ EventMerger.prototype = {
             if (isTransparent(keep)) {
                 this.makeAltTextColors(keep, colors);
             } else {
-                this.makeStripes(keep, colors);
+                makeStripes(keep, colors);
             }
             this.cleanUp && this.cleanUp(keep);
         }
     },
     mergeSets: function ($events) {
-        var sets = this.getEventSets($events);
+        var sets = getEventSets($events, this.makeKey);
         $.each(sets, $.proxy(this.mergeEvents, this));
     }
 };
 
 /*****************************************************************************/
+
+function getEventSets($events, make_key_function) {
+    var event_sets = {};
+    $events.each(function () {
+        var $event = $(this),
+            key = make_key_function($event).replace(/\s/g, '');
+        event_sets[key] = event_sets[key] || [];
+        event_sets[key].push($event);
+    });
+    return event_sets;
+}
+
+function makeStripes($element, colors) {
+    var gradient = "repeating-linear-gradient( 45deg,",
+        pos = 0;
+    $.each(colors, function (i, color) {
+        gradient += color + " " + pos + "px,";
+        pos += 10;
+        gradient += color + " " + pos + "px,";
+    });
+    gradient = gradient.slice(0, -1);
+    gradient += ")";
+    $element.css('background-image', gradient);
+}
 
 function isTransparent($event) {
   return $event.css('background-color').indexOf('rgba') !== -1;
