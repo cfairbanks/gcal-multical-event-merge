@@ -62,9 +62,8 @@ EventMerger.prototype = {
             });
 
             var keep = event_set.shift();
-            $(event_set).each(function () {
-                $(this).parent().css('visibility', 'hidden');
-                $(this).parent().find('*').css('visibility', 'hidden');
+            $(event_set).each(function (i, $event) {
+                hideEvent($event);
             });
 
             if (isTransparent(keep)) {
@@ -101,6 +100,11 @@ function getBackgroundColor($event) {
   } else {
     return background;
   }
+}
+
+function hideEvent($event) {
+    $event.parent().css('visibility', 'hidden');
+    $event.parent().find('*').css('visibility', 'hidden');
 }
 
 function cleanEventTitle(event_title) {
