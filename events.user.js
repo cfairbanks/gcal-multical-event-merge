@@ -12,12 +12,12 @@
 
 'use strict';
 
-function EventMerger(key_function, clean_up_function) {
+function LegacyEventMerger(key_function, clean_up_function) {
     this.makeKey = key_function;
     this.cleanUp = clean_up_function;
 }
 
-EventMerger.prototype = {
+LegacyEventMerger.prototype = {
     makeAltTextColors: function ($element, colors) {
         $element.prepend(" ");
         $element.find(".color-bar").remove();
@@ -146,10 +146,10 @@ function cleanUp($event) {
     }
 }
 
-var weekTimed = new EventMerger(weekTimedEventKey, cleanUp),
-    weekAllDay = new EventMerger(tableEventKey),
-    monthTimed = new EventMerger(monthTimedEventKey),
-    monthAllDay = new EventMerger(monthAllDayEventKey);
+var weekTimed = new LegacyEventMerger(weekTimedEventKey, cleanUp),
+    weekAllDay = new LegacyEventMerger(tableEventKey),
+    monthTimed = new LegacyEventMerger(monthTimedEventKey),
+    monthAllDay = new LegacyEventMerger(monthAllDayEventKey);
 
 chrome.runtime.sendMessage({}, function(response) {
   if (response.enabled) {
