@@ -262,48 +262,48 @@ chrome.runtime.sendMessage({}, function(response) {
         }
     });
 
-        const CALENDAR_GRID = "[role=main] [role=grid]";
-        const DRAGSOURCE_TYPE_ATTRIBUTE = 'data-dragsource-type';
+      const CALENDAR_GRID = "[role=main] [role=grid]";
+      const DRAGSOURCE_TYPE_ATTRIBUTE = 'data-dragsource-type';
 
-        // TODO - merge daily events
-        const DAILY_TIMED_EVENT_SELECTOR = '';
-        const DAILY_ALL_DAY_EVENT_SELECTOR = '';
+      // TODO - merge daily events
+      const DAILY_TIMED_EVENT_SELECTOR = '';
+      const DAILY_ALL_DAY_EVENT_SELECTOR = '';
 
-        const WEEKLY_TIMED_EVENT_SELECTOR = '[data-dragsource-type=2], [data-dragsource-type=5]';
-        const WEEKLY_ALL_DAY_EVENT_SELECTOR = '[data-dragsource-type=6] [role=button], [data-dragsource-type=9] [role=button]';
+      const WEEKLY_TIMED_EVENT_SELECTOR = '[data-dragsource-type=2], [data-dragsource-type=5]';
+      const WEEKLY_ALL_DAY_EVENT_SELECTOR = '[data-dragsource-type=6] [role=button], [data-dragsource-type=9] [role=button]';
 
-        // TODO - merge monthly events
-        const MONTHLY_TIMED_EVENT_SELECTOR = '';
-        const MONTHLY_ALL_DAY_EVENT_SELECTOR = '';
+      // TODO - merge monthly events
+      const MONTHLY_TIMED_EVENT_SELECTOR = '';
+      const MONTHLY_ALL_DAY_EVENT_SELECTOR = '';
 
-        // create an observer instance
-        var observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                if (mutation.attributeName === DRAGSOURCE_TYPE_ATTRIBUTE) {
-                    if (!merging_main) {
-                        merging_main = true;
+      // create an observer instance
+      var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+              if (mutation.attributeName === DRAGSOURCE_TYPE_ATTRIBUTE) {
+                  if (!merging_main) {
+                      merging_main = true;
 
-                        switch ($(mutation.target).attr(DRAGSOURCE_TYPE_ATTRIBUTE)) {
-                            case '2':
-                            case '5':
-                                week_timed_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_TIMED_EVENT_SELECTOR));
-                                break;
-                            case '6':
-                            case '9':
-                                week_all_day_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_ALL_DAY_EVENT_SELECTOR));
-                                break;
-                        }
+                      switch ($(mutation.target).attr(DRAGSOURCE_TYPE_ATTRIBUTE)) {
+                          case '2':
+                          case '5':
+                              week_timed_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_TIMED_EVENT_SELECTOR));
+                              break;
+                          case '6':
+                          case '9':
+                              week_all_day_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_ALL_DAY_EVENT_SELECTOR));
+                              break;
+                      }
 
-                        merging_main = false;
-                    }
-                }
-            });
-        });
+                      merging_main = false;
+                  }
+              }
+          });
+      });
 
-        // TODO - merge events on the "find time" page
+      // TODO - merge events on the "find time" page
 
-        $(CALENDAR_GRID).on("DOMNodeInserted", function (e) {
-            observer.observe(e.target, {attributes: true});
-        });
-    }
+      $(CALENDAR_GRID).on("DOMNodeInserted", function (e) {
+          observer.observe(e.target, {attributes: true});
+      });
+  }
 });
