@@ -267,6 +267,10 @@ chrome.runtime.sendMessage({}, function(response) {
         const WEEKLY_TIMED_EVENT_SELECTOR = '[data-dragsource-type=2], [data-dragsource-type=5]';
         const WEEKLY_ALL_DAY_EVENT_SELECTOR = '[data-dragsource-type=6] [role=button], [data-dragsource-type=9] [role=button]';
 
+        // TODO - merge monthly events
+        const MONTHLY_TIMED_EVENT_SELECTOR = '';
+        const MONTHLY_ALL_DAY_EVENT_SELECTOR = '';
+
         // create an observer instance
         var observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
