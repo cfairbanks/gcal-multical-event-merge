@@ -264,6 +264,11 @@ chrome.runtime.sendMessage({}, function(response) {
 
         const CALENDAR_GRID = "[role=main] [role=grid]";
         const DRAGSOURCE_TYPE_ATTRIBUTE = 'data-dragsource-type';
+
+        // TODO - merge daily events
+        const DAILY_TIMED_EVENT_SELECTOR = '';
+        const DAILY_ALL_DAY_EVENT_SELECTOR = '';
+
         const WEEKLY_TIMED_EVENT_SELECTOR = '[data-dragsource-type=2], [data-dragsource-type=5]';
         const WEEKLY_ALL_DAY_EVENT_SELECTOR = '[data-dragsource-type=6] [role=button], [data-dragsource-type=9] [role=button]';
 
@@ -294,6 +299,8 @@ chrome.runtime.sendMessage({}, function(response) {
                 }
             });
         });
+
+        // TODO - merge events on the "find time" page
 
         $(CALENDAR_GRID).on("DOMNodeInserted", function (e) {
             observer.observe(e.target, {attributes: true});
