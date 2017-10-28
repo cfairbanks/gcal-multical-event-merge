@@ -33,17 +33,6 @@ LegacyEventMerger.prototype = {
             return color;
         }
     },
-    hideEvent: function ($event) {
-        $event.parent().css('visibility', 'hidden');
-        $event.parent().find('*').css('visibility', 'hidden');
-    },
-    cleanUp: function ($event) {
-        var chip = $event.parents('.chip');
-        if (chip[0]) {
-            var left = Number(chip[0].style.left.replace(/%/g, ''));
-            chip.css('width', 100 - (isNaN(left) ? 0 : left) + "%");
-        }
-    },
     makeAltTextColors: function ($element, colors) {
         $element.prepend(" ");
         $element.find(".color-bar").remove();
@@ -66,9 +55,8 @@ LegacyEventMerger.prototype = {
             });
 
             var keep = event_set.shift();
-            var hideEvent = this.hideEvent;
             $(event_set).each(function (i, $event) {
-                hideEvent($event);
+                hideEvent($event.parent());
             });
 
             if (isTransparent(keep.css('background-color'))) {
@@ -78,7 +66,7 @@ LegacyEventMerger.prototype = {
             }
 
             if (this.do_clean_up) {
-                this.cleanUp(keep);
+                cleanUp(keep.parents('.chip'));
             }
         }
     },
@@ -154,6 +142,18 @@ function getLegacyMonthAllDayEventKey($event) {
 function getLegacyMonthTimedEventKey($event) {
     var time = $event.find('.te-t').text();
     return getLegacyMonthAllDayEventKey($event) + time;
+}
+
+function hideEvent($event) {
+    $event.css('visibility', 'hidden');
+    $event.find('*').css('visibility', 'hidden');
+}
+
+function cleanUp($keep) {
+    if ($keep[0]) {
+        var left = Number($keep[0].style.left.replace(/%/g, ''));
+        $keep.css('width', 100 - (isNaN(left) ? 0 : left) + "%");
+    }
 }
 
 var weekTimed = new LegacyEventMerger(getLegacyWeekTimedEventKey, true),
