@@ -25,12 +25,12 @@ LegacyEventMerger.prototype = {
      * in the calendar's pre-material design.
      */
     getBackgroundColor: function ($event) {
-        var background = $event.css('background-color');
+        var color = $event.css('background-color');
 
-        if (isTransparent($event)) {
+        if (isTransparent(color)) {
             return $event.css('color');
         } else {
-            return background;
+            return color;
         }
     },
     hideEvent: function ($event) {
@@ -71,7 +71,7 @@ LegacyEventMerger.prototype = {
                 hideEvent($event);
             });
 
-            if (isTransparent(keep)) {
+            if (isTransparent(keep.css('background-color'))) {
                 this.makeAltTextColors(keep, colors);
             } else {
                 makeStripes(keep, colors);
@@ -114,8 +114,8 @@ function makeStripes($element, colors) {
     $element.css('background-image', gradient);
 }
 
-function isTransparent($event) {
-  return $event.css('background-color').indexOf('rgba') !== -1;
+function isTransparent(color) {
+  return color.indexOf('rgba') !== -1;
 }
 
 function isWhite(color) {
