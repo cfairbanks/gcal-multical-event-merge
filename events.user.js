@@ -250,9 +250,9 @@ chrome.runtime.sendMessage({}, function(response) {
         }
     });
 
-    // TODO - fix this, it's broken for legacy "find time"
+    // TODO - fix this, it's broken for legacy "find time" for "all-day" events
     var merging_find_time = false;
-    $(document).on("DOMNodeInserted", "#scTgTable", function (e) {
+    $(document).on("DOMNodeInserted", "#scTgTable, #fatTgTable", function (e) {
         if (!merging_find_time) {
             merging_find_time = true;
             var find_time_container = $(this);
