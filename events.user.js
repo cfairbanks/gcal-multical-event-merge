@@ -250,6 +250,7 @@ chrome.runtime.sendMessage({}, function(response) {
         }
     });
 
+    // TODO - fix this, it's broken for legacy "find time"
     var merging_find_time = false;
     $(document).on("DOMNodeInserted", "#scTgTable", function (e) {
         if (!merging_find_time) {
