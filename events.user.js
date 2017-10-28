@@ -110,6 +110,18 @@ function isWhite(color) {
     return color === 'rgb(255, 255, 255)';
 }
 
+function getValidColor(colors) {
+    for (var i = 0; i < colors.length; i++) {
+        var color = colors[i];
+
+        if (color !== undefined && !isTransparent(color) && !isWhite(color)) {
+            return color;
+        }
+    }
+
+    return 'white';
+}
+
 function cleanEventTitle(event_title) {
     return event_title.trim()
         .replace(/\(.*\)$/, ''); // Remove parentheticals at end for 1:1 lab
