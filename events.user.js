@@ -76,6 +76,47 @@ LegacyEventMerger.prototype = {
     }
 };
 
+function EventMerger(key_function) {
+    this.makeKey = key_function;
+}
+
+EventMerger.prototype = {
+    /**
+     * Return the first background or text color of the calendar event that isn't white, black, or transparent.
+     */
+    getBackgroundColor: function ($event) {
+        var color_options = [
+            $event.css('background-color'),
+            $event.css('color'),
+            // text color for week timed events
+            $event.children('div').eq(1).css('color')
+        ];
+
+        return getValidColor(color_options);
+    },
+    mergeEvents: function (name, event_set) {
+        if (event_set.length > 1) {
+            var getBackgroundColor = this.getBackgroundColor;
+            var colors = $.map(event_set, function (event) {
+                return getBackgroundColor($(event));
+            });
+
+            var keep = event_set.shift();
+            $(event_set).each(function (i, $event) {
+                hideEvent($event);
+            });
+
+            makeStripes(keep, colors);
+
+            cleanUp(keep);
+        }
+    },
+    mergeSets: function ($events) {
+        var sets = getEventSets($events, this.makeKey);
+        $.each(sets, $.proxy(this.mergeEvents, this));
+    }
+};
+
 /*****************************************************************************/
 
 function getEventSets($events, make_key_function) {
@@ -110,11 +151,15 @@ function isWhite(color) {
     return color === 'rgb(255, 255, 255)';
 }
 
+function isBlack(color) {
+    return color === 'rgb(0, 0, 0)';
+}
+
 function getValidColor(colors) {
     for (var i = 0; i < colors.length; i++) {
         var color = colors[i];
 
-        if (color !== undefined && !isTransparent(color) && !isWhite(color)) {
+        if (color !== undefined && !isTransparent(color) && !isWhite(color) && !isBlack(color)) {
             return color;
         }
     }
@@ -173,6 +218,23 @@ var weekTimed = new LegacyEventMerger(getLegacyWeekTimedEventKey, true),
     monthTimed = new LegacyEventMerger(getLegacyMonthTimedEventKey),
     monthAllDay = new LegacyEventMerger(getLegacyMonthAllDayEventKey);
 
+function getWeekTimedEventKey($event) {
+    var event_name = cleanEventTitle($event.find('html-blob').text()),
+        event_time = $event.children('div').eq(1).children('div').eq(1).text(),
+        col = $event.parents('[role=gridcell]').index();
+    return event_name + ':' + event_time + ':' + col;
+}
+
+function getWeekAllDayEventKey($event) {
+    var event_name = cleanEventTitle($event.find('html-blob').text()),
+        width = $event[0].style.width,
+        col = $event.parents('[role=gridcell]').index();
+    return event_name + ":" + width + ':' + col;
+}
+
+var week_timed_merger = new EventMerger(getWeekTimedEventKey),
+    week_all_day_merger = new EventMerger(getWeekAllDayEventKey);
+
 chrome.runtime.sendMessage({}, function(response) {
   if (response.enabled) {
     var merging_main = false;
@@ -198,5 +260,38 @@ chrome.runtime.sendMessage({}, function(response) {
             merging_find_time = false;
         }
     });
-  }
+
+        const CALENDAR_GRID = "[role=main] [role=grid]";
+        const DRAGSOURCE_TYPE_ATTRIBUTE = 'data-dragsource-type';
+        const WEEKLY_TIMED_EVENT_SELECTOR = '[data-dragsource-type=2], [data-dragsource-type=5]';
+        const WEEKLY_ALL_DAY_EVENT_SELECTOR = '[data-dragsource-type=6] [role=button], [data-dragsource-type=9] [role=button]';
+
+        // create an observer instance
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.attributeName === DRAGSOURCE_TYPE_ATTRIBUTE) {
+                    if (!merging_main) {
+                        merging_main = true;
+
+                        switch ($(mutation.target).attr(DRAGSOURCE_TYPE_ATTRIBUTE)) {
+                            case '2':
+                            case '5':
+                                week_timed_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_TIMED_EVENT_SELECTOR));
+                                break;
+                            case '6':
+                            case '9':
+                                week_all_day_merger.mergeSets($(CALENDAR_GRID).find(WEEKLY_ALL_DAY_EVENT_SELECTOR));
+                                break;
+                        }
+
+                        merging_main = false;
+                    }
+                }
+            });
+        });
+
+        $(CALENDAR_GRID).on("DOMNodeInserted", function (e) {
+            observer.observe(e.target, {attributes: true});
+        });
+    }
 });
