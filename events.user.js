@@ -276,6 +276,8 @@ chrome.runtime.sendMessage({}, function(response) {
       const MONTHLY_TIMED_EVENT_SELECTOR = '';
       const MONTHLY_ALL_DAY_EVENT_SELECTOR = '';
 
+      // TODO - weekly events don't re-merge when you navigate from week to week
+
       // create an observer instance
       var observer = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
